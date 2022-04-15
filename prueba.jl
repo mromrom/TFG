@@ -15,7 +15,6 @@ g=path_graph(6)
 plot(g)
 
 t=plot(g)
-g=wheel_graph(10)
 
 plot(g)
 using TikzPictures
