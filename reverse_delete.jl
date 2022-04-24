@@ -14,20 +14,26 @@ for i in 1:length(sources)
     destinations[i] = destinations[i] + 1
 end
 
-g = SimpleWeightedGraph(sources, destinations, weights)
-edges_initial_graph = collect(edges(g))
+g = SimpleWeightedDiGraph(sources, destinations, weights)
 
 function reverse_delete_algorithm(initial_graph)
     edges_initial_graph = collect(edges(initial_graph))
+    final_graph = SimpleWeightedGraph(nv(initial_graph))
+    digraph = SimpleDiGraph(initial_graph)
     sort!(edges_initial_graph, rev=true, by = weight)
     i = 1
-    while (length(edges_initial_graph) != 0 && i<= length(edges_initial_graph))
-        rem_edge!(initial_graph, edges_initial_graph[i].src, edges_initial_graph[i].dst)
-        if (!is_connected(initial_graph))
-            add_edge!(initial_graph, edges_initial_graph[i].src, edges_initial_graph[i].dst,edges_initial_graph[i].weight)
+    while (i <= length(edges_initial_graph))
+        src = edges_initial_graph[i].src
+        dst = edges_initial_graph[i].dst
+        w = edges_initial_graph[i].weight
+        rem_edge!(digraph,src,dst)
+        if (!is_connected(digraph))
+            add_edge!(digraph, src, dst)
+            add_edge!(final_graph, src, dst, w)
         end
+        i += 1
     end
-    return initial_graph
+    return final_graph
 end
-
-reverse_delete_algorithm(g)
+a_g = reverse_delete_algorithm(g)
+ef = collect(edges(a_g))
