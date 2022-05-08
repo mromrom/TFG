@@ -2,19 +2,24 @@ using Graphs
 using SimpleWeightedGraphs
 using GraphPlot
 
+sources =      [0,1,2,3,4,5]
+destinations = [1,2,3,4,5,0]
+weights =      [4.0,7.0,9.0,1,1,1]
+
+for i in 1:length(sources)
+    sources[i] = sources[i] + 1
+end
+
+
+for i in 1:length(sources)
+    destinations[i] = destinations[i] + 1
+end
+
+grafo = SimpleWeightedGraph(sources, destinations, weights)
 
 grafo = wheel_graph(7)
-
+gplot(grafo)
 gplot(g)
-
-neighbors(g,1)
-colors
-zeros_c = ones(nv(g))
-saturation_degree(g,zeros_c,1)
-tt= sort_by_saturation_degree(g,zeros_c)
-println(tt)
-a=[1,2]
-a[1]=3
 d=dSatur_algorithm(grafo)
 function dSatur_algorithm(g)
     colors_vertex = zeros(nv(g))
@@ -22,21 +27,22 @@ function dSatur_algorithm(g)
     while (findfirst(x->x==0,colors_vertex)!=nothing)
         if (findfirst(x->x!=0,colors_vertex)!=nothing)
             v_max_dsatur = vertex_with_max_saturation_degree(g,colors_vertex)
-            color_vertex(v_max_dsatur,colors_vertex)
+            color_vertex(g,v_max_dsatur,colors_vertex)
         else
             sort!(vertices_a, rev=true, by = x-> degree(g,x))
-            color_vertex(vertices_a[1],colors_vertex)
+            color_vertex(g,vertices_a[1],colors_vertex)
         end
     end
 
     return colors_vertex;
 end
 
-function color_vertex(v,colored_vertex)
+function color_vertex(g,v,colored_vertex)
     neighbors_v = neighbors(g,v)
     color = 1
     for i in 1:length(neighbors_v)
-        if (colored_vertex[neighbors_v[i]] == color)
+        #Comprobamos si alguno de los vecinos está coloreado con el mismo color que queremos colorear nosotros el vértice actual
+        if (findfirst(x->colored_vertex[x]==color,neighbors_v)!=nothing)
             color = color + 1;
             colored_vertex[v] = color
         else
@@ -49,7 +55,7 @@ end
 function saturation_degree(g,colors_vertex,v)
     colors=Int64[]
     neighbors_v = neighbors(g,v)
-    keepat!(neighbors_v, findall(x_c->colors_vertex[x_c]!=0,neighbors_v))
+    neighbors_v = findall(x_c->colors_vertex[x_c]!=0,neighbors_v)
     for i in 1:length(neighbors_v)
         if (colors_vertex[neighbors_v[i]] != 0)
         push!(colors,colors_vertex[neighbors_v[i]])
@@ -68,7 +74,7 @@ function vertex_with_max_saturation_degree(g,color_vertex)
     #Aquellos que han sido coloreados, tienen el valor seteado a 0
     vertex_Stur_already_colored = vertices_already_colored(vertex_Stur,color_vertex)
     max_dSatur = maximum(vertex_Stur_already_colored);
-    vertices_with_max_dSatur = findall(x_c->x_c==max_dSatur,vertex_Stur)
+    vertices_with_max_dSatur = findall(x_c->x_c==max_dSatur,vertex_Stur_already_colored)
     if (length(vertices_with_max_dSatur) != 1)
         sort!(vertices_with_max_dSatur, rev=true, by = x-> degree(g,x))
     end
